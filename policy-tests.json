@@ -1,0 +1,134 @@
+{
+  "passed": true,
+  "total": 25,
+  "failures": 0,
+  "globalHookInstalled": false,
+  "simulatedKeys": false,
+  "tests": [
+    {
+      "name": "T keyup plus 5ms blocks media down and matching up",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "All non-media virtual keys always pass unchanged",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Media next without trigger passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Media next after 151ms passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "150ms window boundary included",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "T keydown alone does not arm suppression",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Late keyup and repeated blocked keydowns stay suppressed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "DWORD wrap keeps short interval accurate",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "DWORD wrap rejects interval over threshold",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Hangul keyup plus 10ms blocks media",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Negative hook code always passes and changes no state",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Pause passes new media but completes already blocked pair",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Resume never reuses trigger recorded before or during pause",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Unpaired media keyup is never newly suppressed",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Forwarded media press stays forwarded even across a new T trigger",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Media press started paused stays forwarded after resume",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "O keyup plus 1ms blocks observed injected scan-zero event pair",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "O keydown alone never arms suppression",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "O 150ms boundary blocks but 151ms passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Non-injected media scan-zero events always pass",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Injected nonzero-scan events pass without ending blocked pair",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Eligible forwarded pair remains forwarded across O trigger and other media",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Pause and resume clear O trigger including O pressed during pause",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Negative hook code cannot arm O or disturb eligible pair",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Unrelated Q keyup does not arm media suppression",
+      "passed": true,
+      "detail": ""
+    }
+  ]
+}

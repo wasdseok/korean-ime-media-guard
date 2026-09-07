@@ -1,0 +1,2 @@
+# Preserve release-file bytes, UTF-8 BOM and Windows script line endings.
+* -text
