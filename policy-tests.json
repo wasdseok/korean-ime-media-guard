@@ -1,6 +1,6 @@
 {
   "passed": true,
-  "total": 25,
+  "total": 33,
   "failures": 0,
   "globalHookInstalled": false,
   "simulatedKeys": false,
@@ -127,6 +127,46 @@
     },
     {
       "name": "Unrelated Q keyup does not arm media suppression",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "D keyup arms eligible media pair without suppressing D",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "D keydown alone does not arm suppression",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "D 150ms boundary blocks but 151ms passes",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Pause and resume clear D trigger including D released during pause",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Negative hook code cannot arm D",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "D window stays accurate across DWORD wrap",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "D trigger leaves non-injected and nonzero-scan events independent",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Forwarded media press remains forwarded across D release",
       "passed": true,
       "detail": ""
     }

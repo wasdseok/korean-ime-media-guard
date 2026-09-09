@@ -1,6 +1,6 @@
 # Privacy and publication scope
 
-The utility installs a low-level keyboard hook. All keyboard events are inspected transiently so that the narrow suppression policy can decide whether to forward an event. It remembers the latest T, O and Hangul release timestamps in memory. It does not retain ordinary key histories, reconstruct or save typed sentences, read the clipboard, or make network requests.
+The utility installs a low-level keyboard hook. All keyboard events are inspected transiently so that the narrow suppression policy can decide whether to forward an event. It remembers the latest T, O, D and Hangul release timestamps in memory. It does not retain ordinary key histories, reconstruct or save typed sentences, read the clipboard, or make network requests.
 
 The bounded local status log contains at most 256 Media Next events, virtual key and scan code, event flags, timing relative to the trigger keys, suppression status, counters, process ID and update time. The installed copy writes this to `%LOCALAPPDATA%\KoreanInputGuard\status.json`. `installation.json` contains the local installation and shortcut paths. These files stay on the user's computer.
 
