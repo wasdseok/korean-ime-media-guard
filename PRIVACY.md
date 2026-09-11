@@ -1,15 +1,35 @@
-# Privacy and publication scope
+# 타이핑튠 2.0.4 개인정보 및 기록 범위
 
-The utility installs a low-level keyboard hook. All keyboard events are inspected transiently so that the narrow suppression policy can decide whether to forward an event. It remembers the latest T, O, D, Y and Hangul release timestamps and Q/Backspace press timestamps in memory. It does not retain ordinary key histories, reconstruct or save typed sentences, read the clipboard, or make network requests.
+타이핑튠은 한글 입력 진단과 선택적 입력 보정을 로컬에서 수행합니다. 진단 자료를 서버나 LLM에 자동 전송하지 않습니다. GPT 등 외부 서비스에 JSON을 올릴지는 사용자가 결정합니다.
 
-The bounded local status log contains at most 256 Media Next events, virtual key and scan code, event flags, timing relative to the trigger keys, suppression status, counters, process ID and update time. Status schema version 3 adds timing relative to Y release and Q/Backspace press; these timing values accompany Media Next events and are not a history of ordinary key events. The installed copy writes this to `%LOCALAPPDATA%\KoreanInputGuard\status.json`. `installation.json` contains the local installation and shortcut paths. These files stay on the user's computer.
+## 진단 자료
 
-The optional offline diagnostic page records its test-field text and keyboard/composition events, and focus/pointer events on that page, in memory. It does not collect typing in other apps and has no upload endpoint. A user can explicitly export diagnostic JSON. That export may contain the entire test text and detailed input events. Use non-sensitive sample text and review any export before sharing it.
+진단 JSON은 검사 조건, 선택한 예문과 키 범위, 검사창의 실제 입력, 텍스트 비교, 입력 이벤트, 보정 설정과 차단 내역을 포함할 수 있습니다. Windows 빌드, 런타임 정보, 제조사·모델명, 입력 언어와 사용자가 선택한 키보드 종류도 포함합니다. 입력한 원문과 유니코드 분석은 조합 오류를 조사하는 데 사용됩니다. 검사창에는 비밀번호, 연락처, 문서 원문 등 공개하면 안 되는 내용을 입력하지 마세요.
 
-## Public repository
+2.0.3에서 검사 환경 메모 입력란을 제거했으며, 2.0.3과 2.0.4에서 새로 저장하는 JSON은 `environmentAndUserContext.notes` 항목을 포함하지 않습니다. 2.0.2 등 이전 버전으로 저장한 진단 JSON과 복구 파일에는 당시 작성한 메모가 남아 있을 수 있습니다. 업데이트가 기존 진단 파일의 내용을 변경하거나 삭제하지는 않습니다.
 
-This repository contains source code, installation tools, an executable, documentation, sanitized aggregate verification reports and release packages. It excludes original diagnostic logs, personal filesystem paths, screenshots, registry backups, device identifiers and credentials. Specific test-machine model and exact test timestamps were removed from the public copy. The original local maintenance material was not uploaded.
+프로그램이 보정을 수행하려면 Windows 키보드 이벤트를 관찰해야 합니다. **화면 밖 입력을 저장하지 않는 것과 입력 감시를 하지 않는 것은 다릅니다.** 보정이 켜진 동안 입력 신호를 검사할 수 있지만, 진단창 밖의 문장을 복원하거나 다른 앱의 입력 문자열을 수집하는 기능을 제공하지 않습니다.
 
-`.gitignore` helps prevent accidental additions but is not an access-control mechanism. Anything committed or attached to a public release is public. Before submitting an issue, remove local paths, typed text, usernames, tokens and device identifiers from logs.
+2.0.1~2.0.4의 기본 진단창은 저수준 키보드 훅과 IME·UI 이벤트를 사용하고 Raw Input을 동시에 등록하지 않습니다. 일반 키의 훅 이벤트는 기록이 시작되어 있고 진단 입력란에 포커스가 있을 때만 최근 3,000개 진단 이력에 들어갑니다. 별도의 전역 미디어 이력은 최근 256개이며, 다음 곡 키와 설정된 조건 키의 시간 차이를 기록합니다.
 
-The project has no telemetry or analytics service. Public GitHub interactions and downloads are handled by GitHub under its own policies.
+내장·외장 키보드 선택은 사용자가 지정한 검사 조건입니다. 훅 이벤트만으로 어느 물리 키보드에서 발생한 입력인지 구분하지 않으며, 선택한 이름을 장치 식별 증거로 취급하지 않습니다. 보정도 물리 키보드별로 제한하지 않으므로 선택하지 않은 키보드의 입력 역시 같은 규칙을 만족하면 영향을 받을 수 있습니다. 기본 진단은 장치 원본 경로나 일련번호를 내보내지 않습니다. 이전 버전의 파일에 포함된 `keyboard-01` 같은 세션 내 별칭도 장치의 고유 식별자가 아닙니다.
+
+새 설치에서 보정은 꺼져 있습니다. 창의 X 버튼은 화면을 숨기면서 진단 기록을 중지하지만, 사용자가 켜 둔 보정 기능은 알림 영역에서 계속 실행될 수 있습니다. 알림 영역 메뉴에서 보정을 일시 중지하거나 앱을 종료할 수 있습니다.
+
+전역 보정 상태에는 차단한 특수키 이벤트 수, 타이밍, 규칙 판정 정보가 포함될 수 있습니다. 타이핑튠의 검사 기록과 보정 실행 이후 누적 차단 통계는 기간이 다를 수 있으므로 구분해서 해석해야 합니다.
+
+## 저장 및 공유
+
+2.0.4부터 **검사 완료 · 다음**을 누르면 현재 진단 JSON을 Windows에 지정된 **다운로드** 폴더에 자동 저장한 뒤 다음 예문으로 넘어갑니다. 다운로드 폴더를 옮긴 경우 등록된 현재 위치를 사용합니다. 마지막 예문에서는 저장만 하고 현재 예문을 유지합니다. 파일에는 저장 시점의 현재 검사, 이전 완료 검사, 보관된 이벤트, 보정 설정과 상태가 포함됩니다. 저장할 때마다 별도 이름을 사용하므로 기존 파일을 덮어쓰지 않습니다. 저장 실패 시 현재 입력과 기록을 유지하고 예문을 넘기지 않습니다.
+
+**진단 JSON 저장** 버튼으로 저장 위치를 직접 선택할 수도 있습니다. 다운로드 폴더의 자동 저장과 수동 저장 모두 로컬 파일 생성이며, 앱이 인터넷이나 LLM에 업로드하지 않습니다. 파일을 외부 서비스에 전달할지는 사용자가 결정합니다.
+
+설정과 실행 상태는 기본적으로 `%LOCALAPPDATA%\TypingTune`에 저장됩니다. 앱의 종료·강제 종료·재시작 기능은 기록이 있으면 같은 데이터 폴더의 `recovery` 하위 폴더에 진단 JSON을 자동 보관합니다. 이미 수동으로 저장한 검사도 별도의 복구 파일로 남을 수 있습니다. 이 파일에도 검사창 내용이 포함되며, 자동 업로드는 하지 않습니다. Windows 작업 관리자에서 종료하거나 전원이 끊긴 경우까지 자동 보관을 보장하지 않습니다.
+
+**검사 완료 · 다음**이나 **진단 JSON 저장**을 누르기 전에 검사창 내용을 확인하세요. 이전 버전의 파일을 공유한다면 메모 등 추가 설명도 확인하세요. 외부에 보낼 필요가 없는 정보는 제외하고, 필요하면 개인정보가 없는 예문으로 새 검사를 진행하세요. 프로그램의 기본 진단 설계는 계정 이름, 컴퓨터 이름, 원본 파일 경로, 키보드 장치의 고유 식별자 같은 정보를 그대로 내보내지 않는 것입니다.
+
+문제 분석용 JSON은 프로젝트 공개 저장소에 자동 포함하지 않습니다. 소스와 배포 패키지에 개인 진단 파일, 실행 로그, 스크린샷, 시스템 덤프, 자격 증명을 넣지 마세요.
+
+## 제거 시 데이터
+
+제거 프로그램은 설치 관리 대상 파일과 바로가기를 제거합니다. 다운로드 폴더에 자동 저장한 진단 JSON, 사용자가 직접 저장한 진단 JSON, 설정 및 자동 보관한 `recovery` 진단 자료는 보존합니다. 필요한 기록을 백업한 후 더 이상 필요하지 않은 진단 파일은 사용자가 삭제할 수 있습니다.

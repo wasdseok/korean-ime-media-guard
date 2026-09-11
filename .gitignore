@@ -1,14 +1,22 @@
+# Generated builds and release assets are published through GitHub Releases.
+/dist/
+/artifacts/
 /work/
 /bin/
 /obj/
 /.vs/
+
+# Local user data must never be committed.
+settings.json
 status.json
 status.json.tmp
 media-guard-status.json
 media-guard-status.json.tmp
 installation.json
-*diagnostic*.json
+recovery/
+TypingTune-진단-*.json
 한글입력진단-*.json
+*diagnostic*.json
 *.reg
 *.lnk
 *.pdb

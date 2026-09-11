@@ -1,5 +1,19 @@
 # Changelog
 
+## 2.0.4 — TypingTune
+
+- Replace the legacy portable guard with a Windows per-user installer and a desktop shortcut that opens the diagnosis screen.
+- Add Korean two-set keyboard samples covering all 26 letter keys, seven Shift combinations, and initial, medial, final and complex-final Hangul categories.
+- Export a self-describing diagnostic JSON with a 3,000-event ring, IME and low-level hook observations, completed trials, capture health, correction settings and analysis limitations.
+- Automatically save to the Windows Downloads known folder when **검사 완료 · 다음** is clicked. Save before advancing, never overwrite an existing file, and retain input and records if saving fails.
+- Keep manual JSON export and add orderly exit/restart with local recovery data, plus tray status, suppression counters, pause/resume and exit.
+- Make correction trigger keys and time windows configurable. New installations start with correction disabled; the historical preset is opt-in and is not device-specific.
+- Include the 2.0.1 capture fix: the default diagnosis window uses the low-level hook and IME/UI events without simultaneous Raw Input registration.
+- Include the 2.0.2 sample-height and mouse-wheel improvements and the 2.0.3 removal of the environment memo field from the UI and new exports.
+- Publish installers and source ZIPs as release assets; remove superseded v1 executable, setup scripts and standalone HTML from the current source tree. Historical tags and releases remain available.
+
+Validation: 58 core and 37 diagnostic tests passed, including a build from a fresh source extraction. Current-user installation and synthetic-input UI auto-save checks passed. These checks do not establish effectiveness on every physical keyboard or every Korean IME fault.
+
 ## 1.1.1
 
 - Increase the offline diagnostic page's retained event limit from 1,000 to 3,000, including the on-screen limit and export retention notice.

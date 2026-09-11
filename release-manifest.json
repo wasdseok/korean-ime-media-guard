@@ -1,0 +1,93 @@
+{
+  "product": "TypingTune",
+  "version": "2.0.4",
+  "installer": "TypingTune-Setup-2.0.4.exe",
+  "installerSha256": "CB5DB6358AB649C955CB59144581DF4A8B543018B1337EFFCDBA0B179AFF46C5",
+  "applicationSha256": "2C7A0F7F201FCDBEA93369B6B22D055888C670CEB00602662D6036071C268EAA",
+  "builtAtUtc": "2026-09-11T18:50:09.1942061Z",
+  "packageScope": "current-user",
+  "desktopOpensDiagnostic": true,
+  "automaticStartupDefault": false,
+  "sourceArchive": "TypingTune-Source-2.0.4.zip",
+  "sourceArchiveSha256": "306D27B634A4C046214A15F67D26B237B22BE38827DEA913A762BEADE09BEE65",
+  "sourceFiles": [
+    {
+      "path": "src/Core.cs",
+      "sha256": "1F5BB0012671EC83CEAEDE068E4318402FCAC0CD472715407F1DD8EEEB915EC1"
+    },
+    {
+      "path": "src/CoreTests.cs",
+      "sha256": "21F73F159454B38D79D253B2D856ABE8F7CD55496293C46187673B11A34AD8C5"
+    },
+    {
+      "path": "src/Diagnostics.cs",
+      "sha256": "FAF9DC0E8119385013F968CB94E1E24332F49FB54DE26A1E65F4E1BBEF6D75B4"
+    },
+    {
+      "path": "src/DiagnosticTests.cs",
+      "sha256": "2ACA2AFC1660A1C64FFE3C869BEA2D0D8C17439DEEA2C2D3B6EAC5A839EF44B3"
+    },
+    {
+      "path": "src/ImeTextBox.cs",
+      "sha256": "E95A3EE4566402C899A0079C976EEB1E3EC9DBC2B928C42749A60109E9D6345C"
+    },
+    {
+      "path": "src/MainForm.cs",
+      "sha256": "EECFE14B463E07D1BD98C2CCBB2EF24C8EAF2A58B2410E6CAF7F066430971414"
+    },
+    {
+      "path": "src/Program.cs",
+      "sha256": "886C24E8CFC0CAFF3DE08B09B72C4A5A3E68D829BB2C74D8D0E0181F8E93CD4A"
+    },
+    {
+      "path": "src/Samples.cs",
+      "sha256": "DDDA733D848F421A371441BDAAD76285BA2D8D5225D587E81F3071E5A981745D"
+    },
+    {
+      "path": "installer/TypingTune.iss",
+      "sha256": "3A7B6C52B10F756971623F00779247E144E3C19A6E71BBFDE7F5A73EFDFEB6F6"
+    },
+    {
+      "path": "installer/test-install.ps1",
+      "sha256": "177785DA2E0DEA865FA780393B94D61AC6562A932C179232C5F0B349F8BE72C3"
+    },
+    {
+      "path": "app.manifest",
+      "sha256": "CB943C57D5752EACA6B754A7C234E8D5E1768DC224B95B925E34459EF981395D"
+    },
+    {
+      "path": "build.ps1",
+      "sha256": "5296B7AFF465EE391C1DBD077A2B58B28C075B878CE8A9EB5A75167C3DA9CB2A"
+    },
+    {
+      "path": "package.ps1",
+      "sha256": "2E3C02822912330E62CEA07B621EFDCCA7D11BBDCDCE88AB1410AFC46B6E9656"
+    },
+    {
+      "path": "README-ko.md",
+      "sha256": "927BDB906B9C31894F2A7E71BC9AF8636DED73E5D5FA1BBCA9A7C564ED64B7E3"
+    },
+    {
+      "path": "PRIVACY.md",
+      "sha256": "772E820FDA79CFDF36622915ED506985292467D3F89385D67757F40D6CC337F4"
+    },
+    {
+      "path": "LLM-JSON-GUIDE.md",
+      "sha256": "2EC15B8505FA4FECB9A34BE5E85B24A616C8605E5D4C6C9481F40BCF0F14ED55"
+    },
+    {
+      "path": "LICENSE",
+      "sha256": "3A1E506C1A7A08C5283A64D32B18F16A9E236E99877B2630634EEBA0D3D7F1C2"
+    }
+  ],
+  "validation": {
+    "coreTestsPassed": 58,
+    "diagnosticTestsPassed": 37,
+    "freshExtractedFilesVerified": 17,
+    "freshSourceBuildPassed": true,
+    "freshSourceSelfTestsPassed": 95,
+    "installationTestedByThisPackagingRun": false,
+    "realPhysicalTypingTestedByThisPackagingRun": false,
+    "sourceScope": "Explicit 17-file source allowlist; excludes user diagnostic files, settings, recovery data, screenshots, logs, and binaries."
+  }
+}
