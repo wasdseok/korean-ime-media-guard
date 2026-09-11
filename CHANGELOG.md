@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1
+
+- Increase the offline diagnostic page's retained event limit from 1,000 to 3,000, including the on-screen limit and export retention notice.
+- Diagnostic-page and package update only. The v1.1.0 guard executable and suppression policy are unchanged.
+
 ## 1.1.0
 
 - Add Y release to the existing T/O/D/Hangul release window of 150 ms.

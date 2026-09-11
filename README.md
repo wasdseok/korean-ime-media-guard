@@ -62,3 +62,7 @@ The keyboard hook inspects events transiently. It does not save typed sentences 
 전체 C# 소스와 Windows PowerShell 설치 소스를 포함합니다. 빌드 명령은 [복원 안내](README-ko.md)에 있습니다. 빌드 위치·도구 차이로 바이너리 해시가 달라질 수 있으며, 수정 배포 시 설치기 기준 해시와 배포 해시를 함께 갱신해야 합니다.
 
 MIT License. 독립적인 개인 프로젝트이며 Microsoft, ASUS 또는 OpenAI의 공식 제품이나 지원 도구가 아닙니다.
+
+## 진단 페이지 보관 한도 (패키지 v1.1.1)
+
+진단 페이지는 최근 이벤트 3,000개를 보관하고 JSON으로 저장합니다. 3,000개를 넘으면 오래된 이벤트부터 제외됩니다. 화면의 최근 이벤트 표는 30개를 표시합니다. 보정 실행 파일과 차단 규칙은 v1.1.0과 같습니다.

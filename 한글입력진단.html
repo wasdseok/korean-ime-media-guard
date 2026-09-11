@@ -25,7 +25,7 @@
 <p id="inputHelp" class="muted small">최대 2,000자. 한글 예문을 반복할 때 줄바꿈해도 됩니다. 이 페이지 밖의 타이핑은 기록하지 않습니다.</p>
 <div class="controls"><button id="start" class="primary" type="button">기록 시작</button><button id="stop" type="button" disabled>기록 중지</button><button id="save" type="button" disabled>진단 JSON 저장</button><button id="reset" type="button">입력·기록 초기화</button></div>
 <p id="status" class="status" role="status">대기 중 — 입력칸을 클릭하면 시작합니다.</p>
-<div class="metrics"><div class="metric"><strong id="eventCount">0</strong><span>보관 중인 이벤트 / 최대 1,000</span></div><div class="metric"><strong id="compositionCount">0</strong><span>기록 중 조합 종료 횟수</span></div><div class="metric"><strong id="jamoCount">0</strong><span>현재 글의 독립 자모 수</span></div><div class="metric"><strong id="controlCount">0</strong><span>기록 중 이동·제어 키 누름</span></div></div>
+<div class="metrics"><div class="metric"><strong id="eventCount">0</strong><span>보관 중인 이벤트 / 최대 3,000</span></div><div class="metric"><strong id="compositionCount">0</strong><span>기록 중 조합 종료 횟수</span></div><div class="metric"><strong id="jamoCount">0</strong><span>현재 글의 독립 자모 수</span></div><div class="metric"><strong id="controlCount">0</strong><span>기록 중 이동·제어 키 누름</span></div></div>
 <div class="notice" style="margin-top:14px"><strong>다음 곡 키 입력: <span id="mediaNextCount">0</span>회</strong><p class="small">이전 검사에서 T(ㅅ) 키를 뗀 직후 다음 곡 키(<code>MediaTrackNext</code>)가 추가로 관측됐습니다. 위 숫자는 이번 기록에서 관측한 다음 곡 키 누름 횟수입니다. 추가 키 입력의 원인이 하드웨어인지 소프트웨어인지는 이 수치만으로 판정할 수 없습니다.</p></div>
 <h2>현재 글에 남은 독립 자모</h2>
 <p id="jamo" class="jamo">없음</p>
@@ -33,11 +33,11 @@
 <h2>최근 이벤트 30개 <span class="muted small">(오래된 순 → 최신 순)</span></h2>
 <div class="table-wrap"><table><thead><tr><th scope="col">시간 (ms)</th><th scope="col">이벤트</th><th scope="col">관측 내용</th></tr></thead><tbody id="events"><tr><td colspan="3">아직 기록이 없습니다.</td></tr></tbody></table></div>
 <details style="margin-top:22px"><summary>기록에서 확인할 수 있는 것</summary><p>키 누름·뗌, <code>code</code>·<code>key</code>, 반복 여부, 수정 키, 브라우저의 조합 상태, <code>compositionstart/update/end</code>, <code>beforeinput/input</code>, 이 페이지의 클릭, 입력칸의 포커스·선택 변화 및 당시 글자의 유니코드 값을 기록합니다.</p><p>이동·제어 키 집계는 방향키, Home/End, PageUp/PageDown, Escape, Tab, Enter, Backspace, Delete입니다. 정상적인 줄바꿈·수정도 포함됩니다. 조합 종료도 정상 입력 중 자주 발생합니다.</p><p>브라우저의 키 이벤트는 원시 하드웨어 신호가 아닙니다. 기록은 조합 종료 전후 상황을 비교하는 자료이며, <strong>자동으로 하드웨어 고장 여부를 판정하지 않습니다.</strong> Windows가 소비한 키, 입력칸 밖의 키, 브라우저가 노출하지 않는 입력은 보이지 않을 수 있습니다.</p></details>
-<footer>다운로드하는 JSON에는 이 입력칸의 글과 기록된 이벤트가 들어갑니다. 다른 사람에게 보낼 때 내용을 확인하세요. 최근 1,000개를 넘은 이벤트는 오래된 순서대로 제외되며, 집계 숫자는 기록 전체 기준입니다.</footer>
+<footer>다운로드하는 JSON에는 이 입력칸의 글과 기록된 이벤트가 들어갑니다. 다른 사람에게 보낼 때 내용을 확인하세요. 최근 3,000개를 넘은 이벤트는 오래된 순서대로 제외되며, 집계 숫자는 기록 전체 기준입니다.</footer>
 <script>
 'use strict';
 (() => {
- const LIMIT = 1000;
+ const LIMIT = 3000;
  const $ = id => document.getElementById(id);
  const field = $('typing');
  const controls = new Set(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Home','End','PageUp','PageDown','Escape','Tab','Enter','Backspace','Delete']);

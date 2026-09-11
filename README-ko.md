@@ -70,3 +70,7 @@ v1.1.0은 Y 해제 직후의 다음 곡 입력이 서로 다른 두 브라우저
 재빌드한 파일은 해시가 달라질 수 있으므로, 수정·재빌드 배포 시 Setup.ps1의 기준 해시와 패키지 해시도 함께 갱신해야 합니다.
 
 Microsoft 참고: [Windows 재설치](https://support.microsoft.com/en-US/Windows/Deployment/Install-Upgrade/reinstall-windows-with-the-installation-media), [시작프로그램 설정](https://support.microsoft.com/en-US/Windows/Experience/Startup-Boot/configure-startup-applications-in-windows), [주입된 키 이벤트 표시](https://learn.microsoft.com/en-us/windows/win32/api/winuser/ns-winuser-kbdllhookstruct).
+
+## 진단 페이지 보관 한도 (패키지 v1.1.1)
+
+진단 페이지는 최근 이벤트 3,000개를 보관하고 JSON으로 저장합니다. 3,000개를 넘으면 오래된 이벤트부터 제외됩니다. 화면의 최근 이벤트 표는 30개를 표시합니다. 보정 실행 파일과 차단 규칙은 v1.1.0과 같습니다.
