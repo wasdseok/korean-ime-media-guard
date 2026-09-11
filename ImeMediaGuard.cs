@@ -18,17 +18,24 @@ namespace ImeMediaGuard
         public const uint T = 0x54;
         public const uint O = 0x4F;
         public const uint D = 0x44;
+        public const uint Y = 0x59;
+        public const uint Q = 0x51;
+        public const uint Backspace = 0x08;
         public const uint Hangul = 0x15;
         public const uint MediaNext = 0xB0;
         public const uint WindowMs = 150;
-        private bool hasT, hasO, hasD, hasHangul, blockedMediaDown, passedMediaDown;
-        private uint tTime, oTime, dTime, hangulTime;
+        public const uint CandidateDownWindowMs = 30;
+        public const string Version = "T-O-D-Y-up-Q-Backspace-down-Hangul-injected-scan0-v4";
+        private bool hasT, hasO, hasD, hasY, hasQDown, hasBackspaceDown, hasHangul, blockedMediaDown, passedMediaDown;
+        private bool qHeld, backspaceHeld;
+        private uint tTime, oTime, dTime, yTime, qDownTime, backspaceDownTime, hangulTime;
         public bool Paused { get; private set; }
 
         public void SetPaused(bool paused)
         {
             Paused = paused;
-            hasT = hasO = hasD = hasHangul = false;
+            hasT = hasO = hasD = hasY = hasQDown = hasBackspaceDown = hasHangul = false;
+            // Keep held state across pause: an autorepeat after resume is not a new press.
             // Keep ownership of a suppressed down until its matching up arrives.
             // Passing this up through would create an unmatched key-up downstream.
         }
@@ -36,6 +43,9 @@ namespace ImeMediaGuard
         public long DeltaT(uint time) { return hasT ? (long)unchecked(time - tTime) : -1L; }
         public long DeltaO(uint time) { return hasO ? (long)unchecked(time - oTime) : -1L; }
         public long DeltaD(uint time) { return hasD ? (long)unchecked(time - dTime) : -1L; }
+        public long DeltaY(uint time) { return hasY ? (long)unchecked(time - yTime) : -1L; }
+        public long DeltaQDown(uint time) { return hasQDown ? (long)unchecked(time - qDownTime) : -1L; }
+        public long DeltaBackspaceDown(uint time) { return hasBackspaceDown ? (long)unchecked(time - backspaceDownTime) : -1L; }
         public long DeltaHangul(uint time) { return hasHangul ? (long)unchecked(time - hangulTime) : -1L; }
 
         public bool Suppress(int hookCode, uint vk, bool isDown, uint time, uint scan, uint flags)
@@ -43,11 +53,24 @@ namespace ImeMediaGuard
             if (hookCode < 0) return false;
             if (vk != MediaNext)
             {
+                // Only the first down opens these short candidate windows. Autorepeat
+                // must not turn a held key into a continuous media-command filter.
+                if (vk == Q)
+                {
+                    if (isDown && !qHeld && !Paused) { hasQDown = true; qDownTime = time; }
+                    qHeld = isDown;
+                }
+                else if (vk == Backspace)
+                {
+                    if (isDown && !backspaceHeld && !Paused) { hasBackspaceDown = true; backspaceDownTime = time; }
+                    backspaceHeld = isDown;
+                }
                 if (!Paused && !isDown)
                 {
                     if (vk == T) { hasT = true; tTime = time; }
                     else if (vk == O) { hasO = true; oTime = time; }
                     else if (vk == D) { hasD = true; dTime = time; }
+                    else if (vk == Y) { hasY = true; yTime = time; }
                     else if (vk == Hangul) { hasHangul = true; hangulTime = time; }
                 }
                 return false;
@@ -71,8 +94,11 @@ namespace ImeMediaGuard
             bool afterT = hasT && unchecked(time - tTime) <= WindowMs;
             bool afterO = hasO && unchecked(time - oTime) <= WindowMs;
             bool afterD = hasD && unchecked(time - dTime) <= WindowMs;
+            bool afterY = hasY && unchecked(time - yTime) <= WindowMs;
+            bool afterQDown = hasQDown && qHeld && unchecked(time - qDownTime) <= CandidateDownWindowMs;
+            bool afterBackspaceDown = hasBackspaceDown && backspaceHeld && unchecked(time - backspaceDownTime) <= CandidateDownWindowMs;
             bool afterHangul = hasHangul && unchecked(time - hangulTime) <= WindowMs;
-            if (!afterT && !afterO && !afterD && !afterHangul) { passedMediaDown = true; return false; }
+            if (!afterT && !afterO && !afterD && !afterY && !afterQDown && !afterBackspaceDown && !afterHangul) { passedMediaDown = true; return false; }
             blockedMediaDown = true;
             return true;
         }
@@ -88,6 +114,9 @@ namespace ImeMediaGuard
         public long deltaSinceTKeyUpMs { get; set; }
         public long deltaSinceOKeyUpMs { get; set; }
         public long deltaSinceDKeyUpMs { get; set; }
+        public long deltaSinceYKeyUpMs { get; set; }
+        public long deltaSinceQKeyDownMs { get; set; }
+        public long deltaSinceBackspaceKeyDownMs { get; set; }
         public long deltaSinceHangulKeyUpMs { get; set; }
         public bool blocked { get; set; }
         public bool paused { get; set; }
@@ -170,6 +199,9 @@ namespace ImeMediaGuard
                     deltaSinceTKeyUpMs = ctx.policy.DeltaT(data.time),
                     deltaSinceOKeyUpMs = ctx.policy.DeltaO(data.time),
                     deltaSinceDKeyUpMs = ctx.policy.DeltaD(data.time),
+                    deltaSinceYKeyUpMs = ctx.policy.DeltaY(data.time),
+                    deltaSinceQKeyDownMs = ctx.policy.DeltaQDown(data.time),
+                    deltaSinceBackspaceKeyDownMs = ctx.policy.DeltaBackspaceDown(data.time),
                     deltaSinceHangulKeyUpMs = ctx.policy.DeltaHangul(data.time),
                     blocked = suppressed, paused = ctx.policy.Paused };
                 ctx.nextEvent = (ctx.nextEvent + 1) % ctx.events.Length;
@@ -201,9 +233,11 @@ namespace ImeMediaGuard
                 List<MediaEvent> recent = new List<MediaEvent>(eventCount);
                 int first = (nextEvent - eventCount + events.Length) % events.Length;
                 for (int i = 0; i < eventCount; i++) recent.Add(events[(first + i) % events.Length]);
-                var status = new { schemaVersion = 2, utility = "ImeMediaGuard", policyVersion = "T-O-D-Hangul-injected-scan0-v3", pid = Process.GetCurrentProcess().Id,
+                var status = new { schemaVersion = 3, utility = "ImeMediaGuard", version = "1.1.0", policyVersion = SuppressionPolicy.Version, pid = Process.GetCurrentProcess().Id,
                     state = currentState,
                     hookInstalled = hook != IntPtr.Zero, windowMs = SuppressionPolicy.WindowMs,
+                    candidateDownWindowMs = SuppressionPolicy.CandidateDownWindowMs,
+                    candidateDownEligibility = "initial Q/Backspace down only; until release; autorepeat does not extend window",
                     mediaEligibility = "vk=0xB0, scan=0, flags&0x10!=0",
                     mediaEventCount = mediaEventCount, blockedEventCount = suppressedEventCount,
                     blockedCompletedPressCount = suppressedPressCount, error = lastError,
@@ -406,7 +440,7 @@ namespace ImeMediaGuard
                 Check(!p.Suppress(-1, 0xB0, true, 111, 0, 17)); Check(p.Suppress(0, 0xB0, true, 112, 0, 17));
                 Check(!p.Suppress(-1, 0xB0, false, 113, 0, 145)); Check(p.Suppress(0, 0xB0, false, 300, 0, 145));
             });
-            test("Unrelated Q keyup does not arm media suppression", delegate {
+            test("Q keyup alone does not arm media suppression", delegate {
                 var p = new SuppressionPolicy(); p.Suppress(0, 0x51, false, 100, 16, 128);
                 Check(!p.Suppress(0, 0xB0, true, 105, 0, 17)); Check(!p.Suppress(0, 0xB0, false, 110, 0, 145));
             });
@@ -460,7 +494,118 @@ namespace ImeMediaGuard
                 Check(!p.Suppress(0, 0xB0, false, 102, 0, 145)); Check(p.Suppress(0, 0xB0, true, 103, 0, 17));
                 Check(p.Suppress(0, 0xB0, false, 104, 0, 145));
             });
-            var report = new { passed = failures == 0, total = results.Count, failures = failures,
+            test("Y release covers observed short intervals and keeps original keys", delegate {
+                foreach (uint delay in new uint[] { 1, 2, 5 }) {
+                    var p = new SuppressionPolicy(); Check(!p.Suppress(0, SuppressionPolicy.Y, true, 10, 21, 0));
+                    Check(!p.Suppress(0, SuppressionPolicy.Y, false, 100, 21, 128));
+                    Check(p.DeltaY(100 + delay) == delay);
+                    Check(p.Suppress(0, 0xB0, true, 100 + delay, 0, 17)); Check(p.Suppress(0, 0xB0, false, 110, 0, 145));
+                }
+            });
+            test("Y release 150ms boundary blocks and 151ms passes", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, SuppressionPolicy.Y, false, 100, 21, 128);
+                Check(p.Suppress(0, 0xB0, true, 250, 0, 17)); Check(p.Suppress(0, 0xB0, false, 250, 0, 145));
+                Check(!p.Suppress(0, 0xB0, true, 251, 0, 17));
+            });
+            test("Y down and negative-hook Y release cannot arm", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, SuppressionPolicy.Y, true, 100, 21, 0);
+                p.Suppress(-1, SuppressionPolicy.Y, false, 101, 21, 128);
+                Check(p.DeltaY(102) == -1); Check(!p.Suppress(0, 0xB0, true, 102, 0, 17));
+            });
+            test("Y pause clears release times from before and during pause", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, SuppressionPolicy.Y, false, 100, 21, 128);
+                p.SetPaused(true); p.Suppress(0, SuppressionPolicy.Y, false, 101, 21, 128); p.SetPaused(false);
+                Check(p.DeltaY(102) == -1); Check(!p.Suppress(0, 0xB0, true, 102, 0, 17));
+            });
+            test("Y release window survives DWORD wrap", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, SuppressionPolicy.Y, false, uint.MaxValue - 4, 21, 128);
+                Check(p.DeltaY(2) == 7); Check(p.Suppress(0, 0xB0, true, 145, 0, 17));
+                Check(p.Suppress(0, 0xB0, false, 145, 0, 145)); Check(!p.Suppress(0, 0xB0, true, 146, 0, 17));
+            });
+            test("Y gate passes real media and injected nonzero-scan media", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, SuppressionPolicy.Y, false, 100, 21, 128);
+                Check(!p.Suppress(0, 0xB0, true, 101, 0, 1)); Check(!p.Suppress(0, 0xB0, false, 102, 0, 129));
+                Check(!p.Suppress(0, 0xB0, true, 103, 25, 17)); Check(!p.Suppress(0, 0xB0, false, 104, 25, 145));
+                Check(p.Suppress(0, 0xB0, true, 105, 0, 17)); p.SetPaused(true);
+                Check(p.Suppress(0, 0xB0, true, 400, 0, 17)); Check(p.Suppress(0, 0xB0, false, 500, 0, 145));
+            });
+            foreach (uint candidate in new uint[] { SuppressionPolicy.Q, SuppressionPolicy.Backspace })
+            {
+                uint key = candidate;
+                string label = key == SuppressionPolicy.Q ? "Q" : "Backspace";
+                test(label + " initial down covers 6ms candidate and owns matching media pair", delegate {
+                    var p = new SuppressionPolicy(); Check(!p.Suppress(0, key, true, 100, 16, 0));
+                    Check(p.Suppress(0, 0xB0, true, 106, 0, 17)); Check(!p.Suppress(0, key, false, 110, 16, 128));
+                    Check(p.Suppress(0, 0xB0, true, 400, 0, 17)); Check(p.Suppress(0, 0xB0, false, 500, 0, 145));
+                });
+                test(label + " 30ms boundary blocks and 31ms passes", delegate {
+                    var p = new SuppressionPolicy(); p.Suppress(0, key, true, 100, 16, 0);
+                    Check(p.Suppress(0, 0xB0, true, 130, 0, 17)); Check(p.Suppress(0, 0xB0, false, 130, 0, 145));
+                    Check(!p.Suppress(0, 0xB0, true, 131, 0, 17));
+                });
+                test(label + " release ends short gate and does not open a release window", delegate {
+                    var p = new SuppressionPolicy(); p.Suppress(0, key, true, 100, 16, 0);
+                    p.Suppress(0, key, false, 101, 16, 128); Check(!p.Suppress(0, 0xB0, true, 102, 0, 17));
+                    var loneUp = new SuppressionPolicy(); loneUp.Suppress(0, key, false, 100, 16, 128);
+                    Check(!loneUp.Suppress(0, 0xB0, true, 101, 0, 17));
+                });
+                test(label + " held repeats cannot extend gate but a fresh press can", delegate {
+                    var p = new SuppressionPolicy(); p.Suppress(0, key, true, 100, 16, 0);
+                    p.Suppress(0, key, true, 200, 16, 0); Check(!p.Suppress(0, 0xB0, true, 201, 0, 17));
+                    Check(!p.Suppress(0, 0xB0, false, 202, 0, 145)); p.Suppress(0, key, false, 203, 16, 128);
+                    p.Suppress(0, key, true, 204, 16, 0); Check(p.Suppress(0, 0xB0, true, 205, 0, 17));
+                });
+                test(label + " pause and resume do not turn held repeat into new press", delegate {
+                    var p = new SuppressionPolicy(); p.Suppress(0, key, true, 100, 16, 0);
+                    p.SetPaused(true); p.Suppress(0, key, true, 101, 16, 0); p.SetPaused(false);
+                    p.Suppress(0, key, true, 102, 16, 0); Check(!p.Suppress(0, 0xB0, true, 103, 0, 17));
+                    Check(!p.Suppress(0, 0xB0, false, 104, 0, 145)); p.Suppress(0, key, false, 105, 16, 128);
+                    p.Suppress(0, key, true, 106, 16, 0); Check(p.Suppress(0, 0xB0, true, 107, 0, 17));
+                });
+                test(label + " first press while paused remains unarmed after resume", delegate {
+                    var p = new SuppressionPolicy(); p.SetPaused(true); p.Suppress(0, key, true, 100, 16, 0);
+                    p.SetPaused(false); p.Suppress(0, key, true, 101, 16, 0);
+                    Check(!p.Suppress(0, 0xB0, true, 102, 0, 17));
+                });
+                test(label + " negative hook cannot arm or mark a key as held", delegate {
+                    var p = new SuppressionPolicy(); Check(!p.Suppress(-1, key, true, 100, 16, 0));
+                    Check(!p.Suppress(0, 0xB0, true, 101, 0, 17)); Check(!p.Suppress(0, 0xB0, false, 102, 0, 145));
+                    p.Suppress(0, key, true, 103, 16, 0); Check(p.Suppress(0, 0xB0, true, 104, 0, 17));
+                });
+                test(label + " short gate survives DWORD wrap", delegate {
+                    var p = new SuppressionPolicy(); p.Suppress(0, key, true, uint.MaxValue - 4, 16, 0);
+                    Check(p.Suppress(0, 0xB0, true, 25, 0, 17)); Check(p.Suppress(0, 0xB0, false, 25, 0, 145));
+                    Check(!p.Suppress(0, 0xB0, true, 26, 0, 17));
+                });
+                test(label + " short gate does not suppress hardware or nonzero-scan media", delegate {
+                    var p = new SuppressionPolicy(); p.Suppress(0, key, true, 100, 16, 0);
+                    Check(!p.Suppress(0, 0xB0, true, 101, 0, 1)); Check(!p.Suppress(0, 0xB0, false, 102, 0, 129));
+                    Check(!p.Suppress(0, 0xB0, true, 103, 25, 17)); Check(!p.Suppress(0, 0xB0, false, 104, 25, 145));
+                    Check(p.Suppress(0, 0xB0, true, 105, 0, 17)); p.SetPaused(true);
+                    Check(!p.Suppress(0, 0xB0, false, 106, 25, 145)); Check(p.Suppress(0, 0xB0, false, 400, 0, 145));
+                });
+                test(label + " new trigger cannot steal an already forwarded media press", delegate {
+                    var p = new SuppressionPolicy(); Check(!p.Suppress(0, 0xB0, true, 90, 0, 17));
+                    p.Suppress(0, key, true, 100, 16, 0); Check(!p.Suppress(0, 0xB0, true, 101, 0, 17));
+                    Check(!p.Suppress(0, 0xB0, false, 102, 0, 145)); Check(p.Suppress(0, 0xB0, true, 103, 0, 17));
+                });
+            }
+            test("Q and Backspace held states and clocks are independent", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, SuppressionPolicy.Q, true, 100, 16, 0);
+                p.Suppress(0, SuppressionPolicy.Backspace, true, 120, 14, 0);
+                p.Suppress(0, SuppressionPolicy.Q, false, 121, 16, 128);
+                Check(p.DeltaQDown(149) == 49 && p.DeltaBackspaceDown(149) == 29);
+                Check(p.Suppress(0, 0xB0, true, 149, 0, 17)); Check(p.Suppress(0, 0xB0, false, 150, 0, 145));
+                p.Suppress(0, SuppressionPolicy.Backspace, false, 151, 14, 128);
+                Check(!p.Suppress(0, 0xB0, true, 152, 0, 17));
+            });
+            test("K alone is not a trigger; T then K overlap uses existing T window", delegate {
+                var p = new SuppressionPolicy(); p.Suppress(0, 0x4B, true, 100, 37, 0);
+                Check(!p.Suppress(0, 0xB0, true, 106, 0, 17)); Check(!p.Suppress(0, 0xB0, false, 107, 0, 145));
+                p.Suppress(0, 0x54, false, 200, 20, 128); p.Suppress(0, 0x4B, true, 284, 37, 0);
+                Check(p.Suppress(0, 0xB0, true, 290, 0, 17)); Check(p.Suppress(0, 0xB0, false, 291, 0, 145));
+            });
+            var report = new { version = "1.1.0", policyVersion = SuppressionPolicy.Version, passed = failures == 0, total = results.Count, failures = failures,
                 testedUtc = DateTime.UtcNow.ToString("o"), globalHookInstalled = false, simulatedKeys = false, tests = results };
             File.WriteAllText(Path.GetFullPath(reportPath), new JavaScriptSerializer().Serialize(report), new UTF8Encoding(false));
             return failures == 0 ? 0 : 1;

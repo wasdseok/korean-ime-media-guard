@@ -6,7 +6,7 @@
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version 2
 $appId = 'CodexImeMediaGuard.Restore.v1'
-$expectedHash = '1A0857A2CF481789DF20EB70422186D2BFB27E4D021D487DA52BAF525B31E88A'
+$expectedHash = '9AF4EC58BCF127DDA3DF9C4C44F61F62CB1C43940A6D7F195E7A686E875E55F5'
 $sourceDir = $PSScriptRoot
 $managedFiles = @('ImeMediaGuard.exe','ImeMediaGuard.cs','Setup.ps1','uninstall.cmd','README-ko.md','policy-tests.json')
 if ($SandboxRoot) {
